@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang = "en">
+    <head>
+        <meta charset="utf-8" />
+        <title>Endertail Menu</title>
+        <script src="https://code.jquery.com/jquery-3.2.1.min.js" 
+		integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" 
+		crossorigin="anonymous"></script>
+    </head>
+    <body>
+        <div id = "container">
+            <h1>Endertail</h1>
+            <h2>W - Forwards</h2>
+            <h2>A - Left</h2>
+            <h2>S - Backwards</h2>
+            <h2>D - Right</h2>
+            <h2>Enter - Interact</h2>
+            <h2>Tilde - Save</h2>
+            <div id = "buttonflexer"><button onclick="window.location.href = 'index.html'" id = "submitbutton">Back</button></div>
+        </div>
+    </body>
+    <script>
+
+    </script>
+    <style>
+		h1
+		{
+			font-size: 60px;
+			margin-bottom: 125px;
+		}
+    	body
+		{
+			background-color: #000000;
+			font-family: undertale;
+			color: white;
+		}
+		@font-face {
+		  font-family: undertale;
+		  src: url("font/MonsterFriendFore.otf");
+		}
+		#playercustomization
+		{
+			border-collapse: collapse;
+			width: 100%;
+		}
+		#playercustomization td
+		{
+			padding: 30px;
+			border: solid 0.1em #FFF;
+		}
+		#playercustomization td > *
+		{
+			vertical-align: middle;
+		}
+		#container
+		{
+			padding: 50px;
+			 width: 800px;
+			 margin: 50px auto 0;
+			 border: solid thick #FFF;
+			 text-align: center;	
+		}
+		#main-form
+		{
+			width: 650px;
+			text-align: left;
+			margin: 0 auto;
+		}
+		form p
+		{
+			border: solid thin #FFF;
+			padding: 30px;
+		}
+		
+		#playerdisplay
+		{
+			width: 154px;
+			height: 154px;
+		}
+		
+		.colortd
+		{
+			width: 373px;
+			height: 50px;
+			position: relative;
+		}
+		
+		label
+		{
+			margin-right: 30px;
+		}
+		
+		#flexpreview
+		{
+			display: flex;
+			width: 100%;
+			height: 100%;
+			justify-content: center;
+			align-items: center;
+		}
+		
+		#playerpreview
+		{
+			width: 75%;
+			height: 75%;
+			border: solid white 0.1em;
+			background-color: white;
+		}
+		
+		#buttonflexer
+		{
+			display: flex;
+			width: 100%;
+			align-items: center;
+			margin-top: 75px;
+		}
+		
+		#submitbutton
+		{
+			border: solid 0.1em #FFFFFF;
+			border-radius: 5px;
+			background-color: #000000;
+			font-family: undertale;
+			font-size: 28px;
+			padding: 10px;
+			margin: 0 auto;
+			color: #FFFFFF;
+		}
+		
+		input[type="color"] 
+		{
+			position: absolute;
+			right: 90px;
+			top: 50%;
+			transform: translateY(-50%);
+		}
+		
+		input[type=range] {
+  -webkit-appearance: none; /* Hides the slider so that custom slider can be made */
+  width: 150px;; /* Specific width is required for Firefox. */
+  background: transparent; /* Otherwise white in Chrome */
+  margin-right: 30px;
+}
+
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+}
+
+input[type=range]:focus {
+  outline: none; /* Removes the blue border. You should probably do some kind of focus styling for accessibility reasons though. */
+}
+
+input[type=range]::-ms-track {
+  cursor: pointer;
+
+  /* Hides the slider so custom styles can be added */
+  background: transparent; 
+  border-color: transparent;
+  color: transparent;
+}
+
+
+
+
+
+
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  height: 40px;
+  width: 40px;
+  border-radius: 3px;
+  background: url("img/undertale-heart.png");
+  background-size: 60px 60px;
+  background-position: center;
+  cursor: pointer;
+  margin-top: -15px; /* You need to specify a margin in Chrome, but in Firefox and IE it is automatic */
+}
+
+
+
+
+
+input[type=range]::-webkit-slider-runnable-track {
+  height: 8.4px;
+  cursor: pointer;
+  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+  background: #FFF;
+  border-radius: 1.3px;
+  border: 0.2px solid #010101;
+}
+
+input[type=range]:focus::-webkit-slider-runnable-track {
+  background: #FFF;
+}
+
+
+
+
+input[type="color"] {
+	-webkit-appearance: none;
+	border: none;
+	width: 48px;
+	height: 48px;
+}
+input[type="color"]::-webkit-color-swatch-wrapper {
+	padding: 0;
+}
+input[type="color"]::-webkit-color-swatch {
+	border: none;
+}
+    </style>
+</html>

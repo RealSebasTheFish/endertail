@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta charset="utf-8" />
+        <title>Endertail</title>
+        <link rel="stylesheet" type="text/css" href="css/main.css">
+        <script src="https://code.jquery.com/jquery-3.2.1.min.js" 
+		integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" 
+		crossorigin="anonymous"></script>
+        <script src = "playerInitilization.js"></script>
+		<script>
+		var $player;
+			var textSpd = 50;
+			var playerSize = 75;
+			var spd = 5;
+			var cutscene = false;
+			var enterpress = false;
+			var textwriting = false;
+			var istyping = false;
+			var check = false;
+			var currentText = 0;
+			var username = localStorage.getItem("username");
+			var mainDialogue = [username + " wakes up in a random room, no one to be seen", username + " doesn't remember where they are, or who they are", username + " decides to take a look around"];
+			$(document).ready(function() {
+                $player = $("#player");
+				if("gameSaved" in localStorage)
+				{
+					gameState = JSON.parse(localStorage.getItem("gameSaved"));
+					if("tempDoorPos" in sessionStorage)
+					{
+						var doorPlayerPos = sessionStorage.getItem("tempDoorPos").split(" ");
+						$player.css("left", doorPlayerPos[0]);
+						$player.css("top", doorPlayerPos[1]);
+						setTimeout(function(){sessionStorage.clear();},100);
+						
+					}
+					else if (window.location.href != gameState.room)
+					{
+						window.location.href = gameState.room;	
+					}
+					else
+					{
+						$player.css("left", gameState.coordinatesx);
+						$player.css("top", gameState.coordinatesy);
+					}
+					if(gameState.advancements.includes("lucky"))
+                    {
+                        $("#luckymachine").show();
+                    }
+				}
+				else
+				{
+					cutscene = true;
+					istyping = true;
+					typewriter("textMain" , mainDialogue[currentText]);				
+				}
+            });
+        $(document).on("keypress", function (e) {
+            if (!cutscene)
+            {
+                if(e.which == 119)
+                {
+                    //w
+                    if (!collision($player.offset().left, $player.offset().top - 5 * spd,0))
+                    {
+                        $player.css("top", parseInt($player.css("top").replace("px","")) - 5 * spd);
+                    }
+                    else if (getCollisionElement($player.offset().left, $player.offset().top - 5 * spd,0).nodeName == "HTML")
+                    {
+                        $player.css("top", 2);
+                    }
+                    else
+                    {
+                        var collisionCoords = $("#" + getCollisionElement($player.offset().left, $player.offset().top - 5 * spd,0).id).position().top + getCollisionElement($player.offset().left, $player.offset().top - 5 * spd,0).offsetHeight;
+                        $player.css("top", collisionCoords + 2);
+                    }
+                }
+                else if(e.which == 97)
+                {
+                    //a
+                    if (!collision($player.offset().left - 5 * spd, $player.offset().top,1))
+                    {
+                        $player.css("left", parseInt($player.css("left").replace("px","")) - 5 * spd);
+                    }
+                    else if (getCollisionElement($player.offset().left - 5 * spd, $player.offset().top,1).nodeName == "BODY")
+                    {
+                        $player.css("left", 2);
+                    }
+                    else
+                    {
+                        var collisionCoords = ($("#" + getCollisionElement($player.offset().left - 5 * spd, $player.offset().top,1).id).position().left) + getCollisionElement($player.offset().left - 5 * spd, $player.offset().top,1).offsetWidth;
+                        $player.css("left", collisionCoords + 2);
+                    }
+                }
+                else if(e.which == 115)
+                {
+                    //s
+                    if (!collision($player.offset().left, $player.offset().top + 5 * spd + playerSize,0))
+                    {
+                        $player.css("top", parseInt($player.css("top").replace("px","")) + 5 * spd);
+                    }
+                    else if (getCollisionElement($player.offset().left, $player.offset().top + 5 * spd + playerSize,0).nodeName == "HTML")
+                    {
+                        $player.css("top", $("#gameView").height() - playerSize - 2);
+                    }
+                    else
+                    {
+                        var collisionCoords = $("#" + getCollisionElement($player.offset().left, $player.offset().top + 5 * spd + playerSize,0).id).position().top;
+
+
+
+                        $player.css("top", collisionCoords - playerSize - 2);
+                    }
+                }
+                else if(e.which == 100)
+                {
+                    //d
+                    if (!collision($player.offset().left + 5 * spd + playerSize, $player.offset().top,1))
+                    {
+                        $player.css("left", parseInt($player.css("left").replace("px","")) + 5 * spd);
+                    }
+                    else if (getCollisionElement($player.offset().left + 5 * spd + playerSize, $player.offset().top,1).nodeName == "BODY")
+                    {
+                        $player.css("left", $("#gameView").width() - playerSize - 2);
+                    }
+                    else
+                    {
+                        var collisionCoords = $("#" + getCollisionElement($player.offset().left + 5 * spd + playerSize, $player.offset().top,1).id).position().left;
+                        $player.css("left", collisionCoords - playerSize - 2);
+                    }
+                }
+					else if (e.which == 96)
+					{
+						gameSave();
+					}
+				}
+				if (e.which == 13)
+				{
+					if(!istyping && !("gameSaved" in localStorage))
+					{
+						if(currentText < mainDialogue.length)
+						{
+							$("#textMain").html("");
+							typewriter("textMain" , mainDialogue[currentText]);	
+						}
+						else
+						{
+                            $("#textMain").html("");
+							window.istyping = false;
+							window.cutscene = false;
+							gameSave();
+						}
+					}
+					else if (!cutscene)
+					{
+						var interactObj = objectInteract($player.offset().left,$player.offset().top);	
+						if (interactObj.id == "door1")
+						{
+							sessionStorage.setItem("tempDoorPos", "566px 0 roomstart");
+							window.location.href = "endertail_rm1.html";
+						}
+						else if (interactObj.id == "luckymachine")
+						{
+							var temps = JSON.parse(localStorage.getItem("gameSaved"));
+                            if (!(temps.advancements.includes("plasma")))
+                            {
+								var guess = prompt("Guess my favorite number! Its 1 - 1000000! If you do, I'll give you a clue!");
+								if (guess < 1 || guess > 1000000 || guess % 1 !== 0)
+								{
+									alert("At least make your guesses accurate");
+								}
+								else if (guess == 734826)
+								{
+									alert("HOW DID YOU GUESS IT! ITS LITERALLY 1 IN A MILLION! A number you'll need is 2");
+								}
+								else
+								{
+									alert("Wrong, you'll never get it");
+								}
+							}
+                            else if(!(temps.advancements.includes("plas2")))
+							{
+								var plar = prompt("Back again? Guess my favourite number again I guess...");	
+								if (plar < 1 || plar > 1000000 || plar % 1 !== 0)
+								{
+									alert("At least make your guesses accurate");
+								}
+								else if (plar == 734826)
+								{
+									alert("Good job, again");
+								}
+								else if (plar == 274)
+								{
+									alert("TH-TH-THATS THE-THE NUMBER, THE NUMBER OF THE GODS, YOU'VE FOUND THE MACHINE, HERE, TAKE THE PLASMA");
+									var temps = JSON.parse(localStorage.getItem("gameSaved"));
+									if (!(temps.advancements.includes("plas2")))
+									{
+										temps.advancements += " plas2";
+										localStorage.setItem("gameSaved", JSON.stringify(temps));
+									}
+								}
+								else
+								{
+									alert("How did you manage to forget it?");
+								}
+							}
+							else
+							{
+								alert("TH-THAT NUMBER.....");	
+							}
+						}
+						else
+						{
+						}
+					}	
+				}	
+				var map = {16: false, 67: false, 69: false};
+				$(document).keydown(function(e) {
+					if (e.keyCode in map) {
+						map[e.keyCode] = true;
+						if (map[16] && map[67] && map[69]) {
+							localStorage.clear();
+							window.location.href = "index.html";
+						}
+					}
+				}).keyup(function(e) {
+					if (e.keyCode in map) {
+						map[e.keyCode] = false;
+					}
+				});
+				});
+				
+				function collision(x,y,direction)
+				{
+					if (direction == 0)
+					{
+						for(var i = 0; i < playerSize; i++)
+						{
+							if (document.elementFromPoint(x + i, y).classList.contains("collide") || document.elementFromPoint(x + i, y).className == "")
+							{
+								return true;	
+							}
+						}
+						return false;
+					}
+					else
+					{
+						for(var i = 0; i < playerSize; i++)
+						{
+							if (document.elementFromPoint(x, y + i).classList.contains("collide") || document.elementFromPoint(x, y + i).className == "")
+							{
+								return true;	
+							}
+						}
+						return false;
+					}
+			}
+			
+			/*function getCollisionCoordinates(x,y,direction)
+			{
+				if (direction == 0)
+				{
+					for(var i = 0; i < playerSize; i++)
+					{
+						if (document.elementFromPoint(x + i, y).className == "collide" || document.elementFromPoint(x + i, y).className == "")
+						{
+							return (y);	
+						}
+					}
+				}
+				else
+				{
+					for(var i = 0; i < playerSize; i++)
+					{
+						if (document.elementFromPoint(x, y + i).className == "collide" || document.elementFromPoint(x, y + i).className == "")
+						{
+							return (x);	
+						}
+					}
+				}
+			}*/
+			
+			function getCollisionElement(x,y,direction)
+			{
+				if (direction == 0)
+				{
+					for(var i = 0; i < playerSize; i++)
+					{
+						if (document.elementFromPoint(x + i, y).classList.contains("collide") || document.elementFromPoint(x + i, y).className == "")
+						{
+							return (document.elementFromPoint(x + i, y));	
+						}
+					}
+				}
+				else
+				{
+					for(var i = 0; i < playerSize; i++)
+					{
+						if (document.elementFromPoint(x, y + i).classList.contains("collide") || document.elementFromPoint(x, y + i).className == "")
+						{
+							return (document.elementFromPoint(x, y + i));	
+						}
+					}
+				}
+			}
+			
+			function gameSave()
+			{
+			    var placeholder;
+			    if ("gameSaved" in localStorage)
+                {
+                    var temp = JSON.parse(localStorage.getItem("gameSaved"));
+                    placeholder = temp.advancements;
+                }
+                else
+                {
+                    placeholder = "start";
+                }
+				gameState = 
+						{
+							room: window.location.href,
+							coordinatesx: $player.css("left"), 
+							coordinatesy: $player.css("top"),
+							advancements: placeholder
+						};
+						localStorage.setItem("gameSaved", JSON.stringify(gameState));
+						$("#saved").show();
+						$("#saved").fadeOut(3000);
+			}
+			
+			function typewriter(elementid, text)
+			{
+				window.istyping = true;
+				var typewriteText = text;
+				var typewriteChars = typewriteText.split("");
+				var textLength = typewriteChars.length;
+				for (var i = 0; i < textLength; i++)
+				{
+					if (typewriteChars[i] == "")
+					{
+						typewriteChars[i] = " ";
+					}
+				}
+				var counter = 0;
+				var dialogue = setInterval(function()
+				{
+					$("#" + elementid).append(typewriteChars[counter]);	
+					counter ++;
+					if(counter == (textLength))
+					{
+						clearInterval(dialogue);
+					}
+				},textSpd);
+				setTimeout(function(){window.istyping = false; window.currentText ++;},textSpd * textLength)
+			}	
+			
+			function objectInteract(playerx, playery)
+			{
+				playerx = parseInt(playerx);
+				playery = parseInt(playery);
+				range = 20;
+				for(var i = 0; i < (playerSize + 2 * range); i++)
+				{
+					for(var j = 0; j < (playerSize + 2 * range); j++)
+					{
+						if(document.elementFromPoint(playerx - range + i, playery - range + j).classList.contains("interact"))
+						{
+							return (document.elementFromPoint(playerx - range + i, playery - range + j));
+						}
+					}
+				}
+				return false;
+			}
+
+
+
+        //Not mine, got this code from Nathan
+        function sound(src) {
+            this.sound = document.createElement("audio");
+            this.sound.src = src;
+            this.sound.setAttribute("preload", "auto");
+            this.sound.setAttribute("controls", "none");
+            this.sound.style.display = "none";
+            document.body.appendChild(this.sound);
+            this.play = function(){
+                this.sound.currentTime = 0;
+                this.sound.play();
+            }
+            this.stop = function(){
+                this.sound.pause();
+            }
+        }
+        </script>
+    </head>
+
+    <body>
+    	<h1 id = "saved">Saved</h1>
+    	<div id = "gameView" class = "nocollide">
+    	<div class = "interact collide" id = "door1"></div>
+        <div class = "interact collide" id = "luckymachine"></div>
+        <div class = "nocollide" id = "spotlight"></div>
+        <div class = "collide" id = "wall1"></div>
+        <div class = "collide" id = "wall2"></div>
+        <h1 id = "textMain"></h1>
+    	<div id = "player"></div>
+        </div>
+    </body>
+    <style>
+		body
+		{
+			background-color: black;
+		}
+    	#player
+		{
+			background-color: #FFFFFF;
+			width: 75px;
+			height: 75px;
+			position: absolute;
+			left: 50px;	
+			bottom: 50px;	
+		}
+		#gameView
+		{
+			text-align: center;
+			margin: 60px auto 0;
+			position: relative;
+			background-color: #000000;
+			border: 10px solid #FFFFFF;
+			height: 800px;
+			width: 1200px;	
+		}
+		#tree
+		{
+			background-color: green;
+			height: 200px;
+			width: 200px;
+			position: absolute;
+			bottom: 253px;
+			left: 457px;	
+		}
+		#spotlight
+		{
+			background-color: grey;
+			height: 200px;
+			width: 200px;
+			border-radius: 100px;
+			position: absolute;
+			bottom: 0px;
+			left: 0px;
+		}
+		#textMain
+		{
+			color: white;	
+			margin-top: 200px;
+			font-family: undertale;
+		}
+		#saved
+		{
+			position: absolute;
+			top: -10px;
+			left: 60px;
+			color: #000;
+			display: none;	
+			font-family: undertale;
+			font-size: 30px;
+			  -webkit-animation: glow 1s ease-in-out infinite alternate;
+			  -moz-animation: glow 1s ease-in-out infinite alternate;
+			  animation: glow 1s ease-in-out infinite alternate;
+		}
+		#wall1
+		{
+			position: absolute;
+			background-color: #000000;
+			border: dotted thick #FFFFFF;
+			top: 0;
+			left: 0;
+			width: 500px;
+			height: 50px;
+		}
+		#wall2
+		{
+			position: absolute;
+			background-color: #000000;
+			border: dotted thick #FFFFFF;
+			top: 0;
+			right: 0;
+			width: 500px;
+			height: 50px;
+		}
+		#door1
+		{
+			position:absolute;
+			height: 30px;
+			width: 100px;
+			top: -20px;
+			left: 550px;
+			background-color: brown;
+			border: solid 0.2em #FFF;
+		}
+        #luckymachine {
+            position: absolute;
+            height: 250px;
+            width: 125px;
+            bottom: 75px;
+            right: 0;
+            border: solid 0.2em #999;
+            border-right: none;
+            background: url("img/hotdogcube.png");
+            display: none;
+        }
+		@font-face {
+		  font-family: undertale;
+		  src: url("font/MonsterFriendFore.otf");
+		}
+@-webkit-keyframes glow {
+  from {
+    text-shadow: 0 0 10px #FFF, 0 0 20px #FFF, 0 0 30px #FFF, 0 0 40px #FFF, 0 0 50px #FFF, 0 0 60px #FFF, 0 0 70px #FFF;
+  }
+  to {
+    text-shadow: 0 0 20px #FFF, 0 0 30px #FFF, 0 0 40px #FFF, 0 0 50px #FFF, 0 0 60px #FFF, 0 0 70px #FFF, 0 0 80px #FFF;
+  }
+}
+    </style>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang = "en">
+    <head>
+        <meta charset="utf-8" />
+        <title>Endertail Menu</title>
+        <script>
+			try{
+			localStorage.removeItem("gameSaved");
+			}
+			catch(e)
+			{
+				console.log(e);	
+			}
+			try{
+			localStorage.removeItem("comboState");
+			}
+			catch(e)
+			{
+				console.log(e);	
+			}
+        </script>
+    </head>
+    <body>
+        <div id = "container">
+            <h1>Endertail</h1>
+            <button onclick = "window.location.href = 'endertail_start.html'">Play</button>
+            <br>
+            <br>
+            <br>
+            <button onclick = "window.location.href = 'endertail_options.html'">Options</button>
+            <br>
+            <br>
+            <br>
+            <button onclick = "window.location.href = 'endertail_controls.html'">Controls</button>
+        </div>
+    </body>
+    <style>
+		h1
+		{
+			font-size: 60px;
+			margin-bottom: 125px;
+		}
+    	body
+		{
+			background-color: #000000;
+			font-family: undertale;
+			color: white;
+		}
+		@font-face {
+		  font-family: undertale;
+		  src: url("font/MonsterFriendFore.otf");
+		}
+		#container
+		{
+			padding: 50px;
+			 width: 800px;
+			 margin: 100px auto 0;
+			 border: solid thick #FFF;
+			 text-align: center;	
+		}
+		button
+		{
+			border: solid 0.1em #FFFFFF;
+			border-radius: 5px;
+			background-color: #000000;
+			font-family: undertale;
+			font-size: 28px;
+			padding: 10px;
+			margin: 0 auto;
+			color: #FFFFFF;
+		}
+    </style>
+</html>

@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta charset="utf-8" />
+        <title>Endertail</title>
+        <link rel="stylesheet" type="text/css" href="css/main.css">
+        <script src="https://code.jquery.com/jquery-3.2.1.min.js" 
+		integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" 
+		crossorigin="anonymous"></script>
+        <script src = "playerInitilization.js"></script>
+		<script>
+			var textSpd = 5;
+			var $player;
+			var playerSize = 75;
+			var spd = 5;
+			var cutscene = false;
+			var enterpress = false;
+			var textwriting = false;
+			var istyping = false;
+			var check = false;
+			var currentText = 0;
+			var mainDialogue = ["You wake up in a random room, no one to be seen","You don't remember where you are, or who you are","You decide to take a look around"];
+			$(document).ready(function() {
+                $player = $("#player");
+				if("gameSaved" in localStorage)
+				{
+					gameState = JSON.parse(localStorage.getItem("gameSaved"));
+					if("tempDoorPos" in sessionStorage)
+					{
+						var doorPlayerPos = sessionStorage.getItem("tempDoorPos").split(" ");
+						if (doorPlayerPos[2] === "room1" || doorPlayerPos[2] === "room6")
+                        {
+                            $player.css("left", doorPlayerPos[0]);
+                            $player.css("bottom", doorPlayerPos[1]);
+                        }
+                        else
+                        {
+                            $player.css("left", doorPlayerPos[0]);
+                            $player.css("top", doorPlayerPos[1]);
+                        }
+						setTimeout(function(){sessionStorage.clear();},100);
+						
+					}
+					else if (window.location.href !== gameState.room)
+					{
+						window.location.href = gameState.room;	
+					}
+					else
+					{
+						$player.css("left", gameState.coordinatesx);
+						$player.css("top", gameState.coordinatesy);
+					}
+					var comboStorage = localStorage.getItem("comboState").split(",");
+					if (comboStorage.length == 3)
+					{
+						$("#value1").html(comboStorage[0].toString());	
+						$("#value2").html(comboStorage[1].toString());	
+						$("#value3").html(comboStorage[2].toString());
+					}
+				}
+				else
+				{
+					cutscene = true;
+					istyping = true;
+					typewriter("textMain" , mainDialogue[currentText]);				
+				}
+            });
+            $(document).on("keypress", function (e) {
+                if (!cutscene)
+                {
+                    if(e.which == 119)
+                    {
+                        //w
+                        if (!collision($player.offset().left, $player.offset().top - 5 * spd,0))
+                        {
+                            $player.css("top", parseInt($player.css("top").replace("px","")) - 5 * spd);
+                        }
+                        else if (getCollisionElement($player.offset().left, $player.offset().top - 5 * spd,0).nodeName == "HTML")
+                        {
+                            $player.css("top", 2);
+                        }
+                        else
+                        {
+                            var collisionCoords = $("#" + getCollisionElement($player.offset().left, $player.offset().top - 5 * spd,0).id).position().top + getCollisionElement($player.offset().left, $player.offset().top - 5 * spd,0).offsetHeight;
+                            $player.css("top", collisionCoords + 2);
+                        }
+                    }
+                    else if(e.which == 97)
+                    {
+                        //a
+                        if (!collision($player.offset().left - 5 * spd, $player.offset().top,1))
+                        {
+                            $player.css("left", parseInt($player.css("left").replace("px","")) - 5 * spd);
+                        }
+                        else if (getCollisionElement($player.offset().left - 5 * spd, $player.offset().top,1).nodeName == "BODY")
+                        {
+                            $player.css("left", 2);
+                        }
+                        else
+                        {
+                            var collisionCoords = ($("#" + getCollisionElement($player.offset().left - 5 * spd, $player.offset().top,1).id).position().left) + getCollisionElement($player.offset().left - 5 * spd, $player.offset().top,1).offsetWidth;
+                            $player.css("left", collisionCoords + 2);
+                        }
+                    }
+                    else if(e.which == 115)
+                    {
+                        //s
+                        if (!collision($player.offset().left, $player.offset().top + 5 * spd + playerSize,0))
+                        {
+                            $player.css("top", parseInt($player.css("top").replace("px","")) + 5 * spd);
+                        }
+                        else if (getCollisionElement($player.offset().left, $player.offset().top + 5 * spd + playerSize,0).nodeName == "HTML")
+                        {
+                            $player.css("top", $("#gameView").height() - playerSize - 2);
+                        }
+                        else
+                        {
+                            var collisionCoords = $("#" + getCollisionElement($player.offset().left, $player.offset().top + 5 * spd + playerSize,0).id).position().top;
+
+
+
+                            $player.css("top", collisionCoords - playerSize - 2);
+                        }
+                    }
+                    else if(e.which == 100)
+                    {
+                        //d
+                        if (!collision($player.offset().left + 5 * spd + playerSize, $player.offset().top,1))
+                        {
+                            $player.css("left", parseInt($player.css("left").replace("px","")) + 5 * spd);
+                        }
+                        else if (getCollisionElement($player.offset().left + 5 * spd + playerSize, $player.offset().top,1).nodeName == "BODY")
+                        {
+                            $player.css("left", $("#gameView").width() - playerSize - 2);
+                        }
+                        else
+                        {
+                            var collisionCoords = $("#" + getCollisionElement($player.offset().left + 5 * spd + playerSize, $player.offset().top,1).id).position().left;
+                            $player.css("left", collisionCoords - playerSize - 2);
+                        }
+                    }
+					else if (e.which == 96)
+					{
+                        var placeholder;
+                        if ("gameSaved" in localStorage)
+                        {
+                            var temp = JSON.parse(localStorage.getItem("gameSaved"));
+                            placeholder = temp.advancements;
+                        }
+                        else
+                        {
+                            placeholder = "start";
+                        }
+                        gameState =
+                            {
+                                room: window.location.href,
+                                coordinatesx: $player.css("left"),
+                                coordinatesy: $player.css("top"),
+                                advancements: placeholder
+                            };
+                        localStorage.setItem("gameSaved", JSON.stringify(gameState));
+                        $("#saved").show();
+                        $("#saved").fadeOut(3000);
+					}
+				}
+				if (e.which == 13)
+				{
+                    if(!istyping && cutscene == true)
+                    {
+						cutscene = false;
+						$("#textMain").html("");
+                    }
+					else if (!(istyping))
+					{
+						var interactObj = objectInteract($player.offset().left,$player.offset().top);	
+						if (interactObj.id == "door4")
+						{
+							sessionStorage.setItem("tempDoorPos", "0 362.5px door4");
+							window.location.href = "endertail_rm1.html";
+						}
+						else if (interactObj.id == "door5")
+						{ 
+							var temps = JSON.parse(localStorage.getItem("gameSaved"));
+                            if (temps.advancements.includes("combo"))
+                            {
+                                sessionStorage.setItem("tempDoorPos", "566px 0");
+								window.location.href = "endertail_rm5.html";
+                            }
+							else
+							{
+								cutscene = true;
+								istyping = true;
+								typewriter("textMain","The door is locked.");	
+							}
+						}
+						else if (interactObj.id == "door6")
+						{
+							sessionStorage.setItem("tempDoorPos", "566px 0");
+							window.location.href = "endertail_rm6.html";
+						}
+						else if (interactObj.id == "morsecode")
+						{
+                            var morse = new sound("audio/morse.wav");
+                            morse.play();
+                            $("#morsedisplay").fadeIn(280);
+                            $("#morsedisplay").fadeOut(280);
+                            $("#morsedisplay").fadeIn(280);
+                            $("#morsedisplay").fadeOut(280);
+                            $("#morsedisplay").fadeIn(125);
+                            $("#morsedisplay").fadeOut(125);
+                            $("#morsedisplay").fadeIn(125);
+                            $("#morsedisplay").fadeOut(125);
+                            $("#morsedisplay").fadeIn(125);
+                            $("#morsedisplay").fadeOut(125);
+						}
+						else if (interactObj.id == "comboDisplay1")
+						{
+							var val = parseInt($("#value1").html());
+							if (val + 1 >= 10)
+							{
+								$("#value1").html("0");
+								localStorage.setItem("comboState",[$("#value1").html(),$("#value2").html(),$("#value3").html()]);
+							}
+							else
+							{
+								$("#value1").html(val + 1);
+								localStorage.setItem("comboState",[$("#value1").html(),$("#value2").html(),$("#value3").html()]);
+							}
+						}
+						else if (interactObj.id == "comboDisplay2")
+						{
+							var val = parseInt($("#value2").html());
+							if (val + 1 >= 10)
+							{
+								$("#value2").html("0");
+								localStorage.setItem("comboState",[$("#value1").html(),$("#value2").html(),$("#value3").html()]);
+							}
+							else
+							{
+								$("#value2").html(val + 1);
+								localStorage.setItem("comboState",[$("#value1").html(),$("#value2").html(),$("#value3").html()]);
+							}
+						}
+						else if (interactObj.id == "comboDisplay3")
+						{
+							var val = parseInt($("#value3").html());
+							if (val + 1 >= 10)
+							{
+								$("#value3").html("0");
+								localStorage.setItem("comboState",[$("#value1").html(),$("#value2").html(),$("#value3").html()]);
+							}
+							else
+							{
+								$("#value3").html(val + 1);
+								localStorage.setItem("comboState",[$("#value1").html(),$("#value2").html(),$("#value3").html()]);
+							}
+						}
+						else if (interactObj.id == "submitCode")
+						{
+							if ($("#value1").html() == 2 && $("#value2").html() == 7 && $("#value3").html() == 4)
+							{
+								cutscene = true;
+								istyping = true;
+								typewriter("textMain","*Click*");
+								var temps = JSON.parse(localStorage.getItem("gameSaved"));
+								if (!(temps.advancements.includes("combo")))
+								{
+									temps.advancements += " combo";
+									localStorage.setItem("gameSaved", JSON.stringify(temps));
+								}
+							}
+							else
+							{
+								cutscene = true;
+								istyping = true;
+								typewriter("textMain","You click the button... Nothing happens.");
+							}
+						}
+						else
+						{
+						}
+					}	
+				}	
+				var map = {16: false, 67: false, 69: false};
+				$(document).keydown(function(e) {
+					if (e.keyCode in map) {
+						map[e.keyCode] = true;
+						if (map[16] && map[67] && map[69]) {
+							localStorage.clear();
+							window.location.href = "index.html";
+						}
+					}
+				}).keyup(function(e) {
+					if (e.keyCode in map) {
+						map[e.keyCode] = false;
+					}
+				});
+				});
+				
+				
+				function collision(x,y,direction)
+				{
+					if (direction == 0)
+					{
+						for(var i = 0; i < playerSize; i++)
+						{
+							if (document.elementFromPoint(x + i, y).classList.contains("collide") || document.elementFromPoint(x + i, y).className == "")
+							{
+								return true;	
+							}
+						}
+						return false;
+					}
+					else
+					{
+						for(var i = 0; i < playerSize; i++)
+						{
+							if (document.elementFromPoint(x, y + i).classList.contains("collide") || document.elementFromPoint(x, y + i).className == "")
+							{
+								return true;	
+							}
+						}
+						return false;
+					}
+			}
+			
+			/*function getCollisionCoordinates(x,y,direction)
+			{
+				if (direction == 0)
+				{
+					for(var i = 0; i < playerSize; i++)
+					{
+						if (document.elementFromPoint(x + i, y).className == "collide" || document.elementFromPoint(x + i, y).className == "")
+						{
+							return (y);	
+						}
+					}
+				}
+				else
+				{
+					for(var i = 0; i < playerSize; i++)
+					{
+						if (document.elementFromPoint(x, y + i).className == "collide" || document.elementFromPoint(x, y + i).className == "")
+						{
+							return (x);	
+						}
+					}
+				}
+			}*/
+			
+			function getCollisionElement(x,y,direction)
+			{
+				if (direction == 0)
+				{
+					for(var i = 0; i < playerSize; i++)
+					{
+						if (document.elementFromPoint(x + i, y).classList.contains("collide") || document.elementFromPoint(x + i, y).className == "")
+						{
+							return (document.elementFromPoint(x + i, y));	
+						}
+					}
+				}
+				else
+				{
+					for(var i = 0; i < playerSize; i++)
+					{
+						if (document.elementFromPoint(x, y + i).classList.contains("collide") || document.elementFromPoint(x, y + i).className == "")
+						{
+							return (document.elementFromPoint(x, y + i));	
+						}
+					}
+				}
+			}
+			
+			function typewriter(elementid, text)
+			{
+				var typewriteText = text;
+				var typewriteChars = typewriteText.split("");
+				var textLength = typewriteChars.length;
+				for (var i = 0; i < textLength; i++)
+				{
+					if (typewriteChars[i] == "")
+					{
+						typewriteChars[i] = " ";
+					}
+				}
+				var counter = 0;
+				var dialogue = setInterval(function()
+				{
+					$("#" + elementid).append(typewriteChars[counter]);	
+					counter ++;
+					if(counter == (textLength))
+					{
+						clearInterval(dialogue);
+					}
+				},textSpd);
+				setTimeout(function(){istyping = false; window.currentText ++;},textSpd * textLength)
+			}	
+			
+			function objectInteract(playerx, playery)
+			{
+				playerx = parseInt(playerx);
+				playery = parseInt(playery);
+				range = 20;
+				for(var i = 0; i < (playerSize + 2 * range); i++)
+				{
+					for(var j = 0; j < (playerSize + 2 * range); j++)
+					{
+						if(document.elementFromPoint(playerx - range + i, playery - range + j).classList.contains("interact"))
+						{
+							return (document.elementFromPoint(playerx - range + i, playery - range + j));
+						}
+					}
+				}
+				return false;
+			}
+
+			//Did not make this on my own, got it from Nathan
+            function sound(src) {
+                this.sound = document.createElement("audio");
+                this.sound.src = src;
+                this.sound.setAttribute("preload", "auto");
+                this.sound.setAttribute("controls", "none");
+                this.sound.volume = 0.1;
+                this.sound.playbackRate = 0.5;
+                this.sound.style.display = "none";
+                document.body.appendChild(this.sound);
+                this.play = function(){
+                    this.sound.currentTime = 0;
+                    this.sound.play();
+                };
+                this.stop = function(){
+                    this.sound.pause();
+                }
+            }
+        </script>
+    </head>
+
+    <body>
+    	<h1 id = "saved">Saved</h1>
+    	<div id = "gameView" class = "nocollide">
+        <div class = "interact collide" id = "door4"></div>
+        <div class = "interact collide" id = "door5"></div>
+        <div class = "interact collide" id = "door6"></div>
+        <div class = "interact collide" id = "morsecode"></div>
+        <div class = "nocollide" id = "morsedisplay"></div>
+        <div class = "interact nocollide" id = "comboDisplay1"><h1 id = "value1" class = "nocollide">0</h1></div>
+        <div class = "interact nocollide" id = "comboDisplay2"><h1 id = "value2" class = "nocollide">0</h1></div>
+        <div class = "interact nocollide" id = "comboDisplay3"><h1 id = "value3" class = "nocollide">0</h1></div>
+        <div class = "interact collide" id = "submitCode"></div>
+        <div class = "collide" id = "wall1"></div>
+        <div class = "collide" id = "wall2"></div>
+        <h1 id = "textMain"></h1>
+    	<div id = "player"></div>
+        </div>
+    </body>
+    <style>
+		body
+		{
+			background-color: black;
+		}
+    	#player
+		{
+			background-color: #FFFFFF;
+			width: 75px;
+			height: 75px;
+			position: absolute;
+			left: 50px;	
+			bottom: 50px;	
+		}
+		#gameView
+		{
+			text-align: center;
+			margin: 60px auto 0;
+			position: relative;
+			background-color: #000000;
+			border: 10px solid #FFFFFF;
+			height: 800px;
+			width: 1200px;	
+		}
+		#tree
+		{
+			background-color: green;
+			height: 200px;
+			width: 200px;
+			position: absolute;
+			bottom: 253px;
+			left: 457px;	
+		}
+		#textMain
+		{
+			color: white;
+			width: 600px;
+			margin: 200px auto 0;
+			line-height: 2;
+		}
+		#saved
+		{
+			position: absolute;
+			top: -10px;
+			left: 60px;
+			color: #0C0;
+			display: none;	
+			color: #0C0;
+			  -webkit-animation: glow 1s ease-in-out infinite alternate;
+			  -moz-animation: glow 1s ease-in-out infinite alternate;
+			  animation: glow 1s ease-in-out infinite alternate;
+		}
+		#wall1
+		{
+			position: absolute;
+			background-color: #000000;
+			border: dotted thick #FFFFFF;
+			top: 0;
+			left: 0;
+			width: 50px;
+			height: 300px;
+		}
+		#wall2
+		{
+			position: absolute;
+			background-color: #000000;
+			border: dotted thick #FFFFFF;
+			bottom: 0;
+			left: 0;
+			width: 50px;
+			height: 300px;
+		}
+		#door4
+		{
+			position:absolute;
+			height: 100px;
+			width: 30px;
+			top: 350px;
+			left:-20px;
+			background-color: brown;
+			border: solid 0.2em #FFF;
+		}
+		#door5
+		{
+			position:absolute;
+			height: 30px;
+			width: 100px;
+			top: -20px;
+			left: 550px;
+			background-color: brown;
+			border: solid 0.2em #FFF;
+		}
+		#door6
+		{
+			position:absolute;
+			height: 30px;
+			width: 100px;
+			bottom: -20px;
+			left: 550px;
+			background-color: brown;
+			border: solid 0.2em #FFF;
+		}
+        #morsecode
+        {
+            position:absolute;
+            height: 30px;
+            width: 60px;
+            bottom: 40px;
+            left: 150px;
+            background-color: lightgreen;
+            border: solid 0.2em #FFF;
+        }
+        #morsedisplay
+        {
+            position: absolute;
+            height: 250px;
+            width: 250px;
+            left: 50%;
+            top: 50%;
+            transform: translateX(-50%) translateY(-50%);
+            background-color: white;
+            display: none;
+        }
+		#comboDisplay1
+		{
+			position: absolute;
+            height: 100px;
+            width: 100px;
+			right: 0;
+			top: 75px;
+            background-color: #000000;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+		}
+		#comboDisplay2
+		{
+			position: absolute;
+            height: 100px;
+            width: 100px;
+			right: 0;
+			top: 50%;
+			transform: translateY(-50%);
+            background-color: #000000;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+		}
+		#comboDisplay3
+		{
+			position: absolute;
+            height: 100px;
+            width: 100px;
+			right: 0;
+			bottom: 75px;
+            background-color: #000000;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+		}
+		@font-face {
+		  font-family: undertale;
+		  src: url("font/MonsterFriendFore.otf");
+		}
+		h1
+		{
+			color: white;
+			font-family: undertale;
+			margin-block-start: 0;
+			margin-block-end: 0;
+		}
+		#submitCode
+        {
+            position:absolute;
+            height: 100px;
+            width: 30px;
+            top: 50%;
+			transform: translateY(-50%);
+            right: 300px;
+            background-color: red;
+            border: solid 0.2em #FFF;
+        }
+		}
+@-webkit-keyframes glow {
+  from {
+    text-shadow: 0 0 10px #0C0, 0 0 20px #0C0, 0 0 30px #e60073, 0 0 40px #e60073, 0 0 50px #e60073, 0 0 60px #e60073, 0 0 70px #e60073;
+  }
+  to {
+    text-shadow: 0 0 20px #0C0, 0 0 30px #ff4da6, 0 0 40px #ff4da6, 0 0 50px #ff4da6, 0 0 60px #ff4da6, 0 0 70px #ff4da6, 0 0 80px #ff4da6;
+  }
+}
+    </style>
+</html>

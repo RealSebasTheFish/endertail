@@ -1,0 +1,13 @@
+* Look at the map attached in the files for a room guide
+1. Head to room 2, click the random button, this makes the hotdog stand appear in the starting room
+2. Find the first number (2) with the hot dog stand owner, you can find his favourite number in room 6 in the newspaper article (734826)
+3. The second number (7) is found in room 4, with the green button at the bottom left of the room displaying it in morse
+4. The third number (4) is found by beating the memory game in room 6, the game can be easily beaten my taking a picture of the numbers before they disappear
+5. You find the order of the numbers (2 7 4) by answering the riddle in room 2 (answer is carpet)
+6. You can input the numbers in from top to bottom, and then click the red button in front of the three numbers and it will display click, opening the door to room 5
+7. In room 5, you can interact with the white block plasma machine, prompting dialogue which informs you about three plasma blobs you need to find and insert into the machine. Some of the previous interactions change after passing this milestone
+8. You can then head back to room 6, and play a harder version of the original memory game to recieve a plasma blob, the same picture taking technique can be used
+9. The next plasma blob can be obtained by speaking to the hot dog stand owner again, and instead of providing him with his favourite number, enter the combo number (274) and since he's superstitious, he gives you the second plasma
+10. The last plasma can be found in room 3, at the top right corner, just simply interact with it to recieve it
+11. Head back to the plasma machine in room 5, and interact with it, you'll recieve a message about a door opening and the end being near
+12. Go to room 3 and enter the previously tricked door (door on the left) and it will lead you to the end 
